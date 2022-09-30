@@ -1,0 +1,11 @@
+MODEL_NAME=sklearn-iris
+INPUT_PATH=@./iris-input.json
+
+SERVICE_HOSTNAME=$(kubectl get inferenceservice ${MODEL_NAME} -n kserve-test -o jsonpath='{.status.url}' | cut -d "/" -f 3)
+
+kubectl get svc istio-ingressgateway -n istio-system
+
+kubectl port-forward -n istio-system svc/istio-ingressgateway 8080:80
+curl -v -H "Host: ${SERVICE_HOSTNAME}" http://localhost:8080/v1/models/$MODEL_NAME:predict -d $INPUT_PATH
+
+
